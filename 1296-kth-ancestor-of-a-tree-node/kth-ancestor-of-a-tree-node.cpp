@@ -2,10 +2,10 @@ class TreeAncestor {
 public:
     vector<vector<int>> up;
     TreeAncestor(int n, vector<int>& parent) {
-        up.resize(5e4+1, vector<int>(17));
+        up.resize(5e4+1, vector<int>(16));
         for(int i = 0; i < n; i++)
             up[i][0] = parent[i];
-        for(int j = 1; j < 17; j++) 
+        for(int j = 1; j < 16; j++) 
             for(int i = 0; i < n; i++) {
                 if(up[i][j - 1] == -1)
                     up[i][j] = -1;
