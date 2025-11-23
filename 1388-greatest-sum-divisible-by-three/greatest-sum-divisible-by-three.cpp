@@ -2,20 +2,23 @@ class Solution {
 public:
     int maxSumDivThree(vector<int>& nums) {
         int n = nums.size();
-        vector<vector<int>> dp(n, vector<int>(3, -1e9));
-        dp[0][nums[0]%3] = nums[0];
-        for(int i = 1; i < n; i++) {
-            int ost = nums[i] % 3;
+        vector<int> dp(3, -1e9);
+        for(int i : nums) {
+            vector<int> ndp = dp;
+            int r = i % 3;
             for(int j = 0; j < 3; j++) {
-                int x = (3 + j - ost) % 3;
-                dp[i][j] = max(dp[i - 1][x] + nums[i], dp[i-1][j]);
-                if(dp[i][j] < 0)
-                    dp[i][j] = -1e9;
+                int x = (3 + j - r) % 3;
+                ndp[j] = max(ndp[j], dp[x] + i);
+                if(ndp[j] < 0) ndp[j] = -1e9;
             }
-            dp[i][ost] = max(dp[i][ost], nums[i]);
+            ndp[r] = max(ndp[r], i);
+            dp.swap(ndp);
         }
-        if(dp[n-1][0] == -1e9)
-            return 0;
-        return dp[n - 1][0];
+        switch(dp[0]) {
+            case (int)-1e9:
+                return 0;
+            default:
+                return dp[0];
+        }
     }
 };
