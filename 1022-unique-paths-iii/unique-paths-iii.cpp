@@ -1,61 +1,56 @@
 class Solution {
 public:
-    int n, m, s, e, ee;
-    vector<int> moves;
-    vector<vector<int>> g, dp;
+    int K; // number of free cells (including start and end)
+    vector<pair<int,int>> coords; // index -> (i,j)
+    vector<int> neighMask; // neighMask[u] bitmask of neighbors indices
+    int startIdx, endIdx;
+    vector<int> memo; // -1 = unknown, otherwise ways
 
-    int f(int i, int j) { return i * m + j; }
-    pair<int, int> f1(int l) { return { l / m, l % m }; }
-    bool b(int i, int j) { return (i >= 0 && j >= 0 && i < n && j < m && g[i][j] != -1); }
-    void mov(pair<int, int> p, int mask) {
-        int i = p.first, j = p.second, tmp;
-        fill(moves.begin(), moves.end(), -1);
-        tmp = f(i + 1, j);
-        if (b(i + 1, j) && (mask & (1 << tmp)))
-            moves[0] = tmp;
-        tmp = f(i - 1, j);
-        if (b(i - 1, j) && (mask & (1 << tmp)))
-            moves[1] = tmp;
-        tmp = f(i, j + 1);
-        if (b(i, j + 1) && (mask & (1 << tmp)))
-            moves[2] = tmp;
-        tmp = f(i, j - 1);
-        if (b(i, j - 1) && (mask & (1 << tmp)))
-            moves[3] = tmp;
-    }
-    int solve(int mask, int last) {
-        if (dp[mask][last] != -1)
-            return dp[mask][last];
-        dp[mask][last] = 0;
-        mov(f1(last), mask);
-        vector<int> pm = moves;
-        for (int i : pm) {
-            if (i == -1) continue;
-            dp[mask][last] += solve(mask ^ (1 << last), i);
+    int getIdx(int mask, int u) { return mask * K + u; }
+
+    int dfs(int mask, int u) {
+        int idx = getIdx(mask, u);
+        if (memo[idx] != -1) return memo[idx];
+        if (mask == (1 << u)) {
+            // base: only u left set; valid only if u == startIdx
+            return memo[idx] = (u == startIdx) ? 1 : 0;
         }
-        return dp[mask][last];
+        int ways = 0;
+        int candidates = neighMask[u] & (mask ^ (1 << u));
+        while (candidates) {
+            int v = __builtin_ctz(candidates);
+            candidates &= candidates - 1;
+            ways += dfs(mask ^ (1 << u), v);
+        }
+        return memo[idx] = ways;
     }
+
     int uniquePathsIII(vector<vector<int>>& grid) {
-        g.swap(grid);
-        n = g.size();
-        m = g[0].size();
-        int N = m * n, MASK = (1 << N) - 1;
-        dp.resize((1 << N), vector<int>(N, -1));
-        moves.resize(4);
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                if (g[i][j] == 1) {
-                    s = f(i, j);
-                    dp[1 << s][s] = 1;
-                }
-                else if (g[i][j] == 2) {
-                    e = f(i, j);
-                    ee = (1 << e);
-                }
-                else if (g[i][j] == -1)
-                    MASK &= ~(1 << (f(i, j)));
+        int n = grid.size(), m = grid[0].size();
+        vector<int> id(n*m, -1);
+        for (int i=0;i<n;i++) for (int j=0;j<m;j++) {
+            if (grid[i][j] != -1) {
+                id[i*m+j] = coords.size();
+                coords.push_back({i,j});
             }
         }
-        return solve(MASK, e);
+        K = coords.size();
+        neighMask.assign(K, 0);
+        for (int u = 0; u < K; ++u) {
+            auto [i,j] = coords[u];
+            const int di[4] = {1,-1,0,0}, dj[4] = {0,0,1,-1};
+            for (int d=0; d<4; ++d) {
+                int ni = i+di[d], nj = j+dj[d];
+                if (ni>=0 && nj>=0 && ni<n && nj<m && id[ni*m+nj] != -1)
+                    neighMask[u] |= (1 << id[ni*m+nj]);
+            }
+            int val = grid[i][j];
+            if (val == 1) startIdx = u;
+            if (val == 2) endIdx = u;
+        }
+
+        int fullMask = (1 << K) - 1;
+        memo.assign((1<<K) * K, -1);
+        return dfs(fullMask, endIdx);
     }
 };
