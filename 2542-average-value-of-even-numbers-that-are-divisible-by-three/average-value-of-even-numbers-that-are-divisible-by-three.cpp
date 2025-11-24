@@ -4,7 +4,7 @@ public:
         int sum = 0;
         int br = 0;
         for(int i : nums) {
-            if(i % 2 == i % 3 && !(i & 1)) {
+            if(!(i % 6)) {
                 sum += i;
                 br++;
             }
