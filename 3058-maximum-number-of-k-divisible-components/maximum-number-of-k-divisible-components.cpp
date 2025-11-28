@@ -18,9 +18,9 @@ public:
     int maxKDivisibleComponents(int n, vector<vector<int>>& edges, vector<int>& values, int k) {
         adj.resize(n);
         dp.resize(n);
-        for(int i = 0; i < n - 1; i++) {
-            adj[edges[i][0]].push_back(edges[i][1]);
-            adj[edges[i][1]].push_back(edges[i][0]);
+        for(auto v : edges) {
+            adj[v[0]].push_back(v[1]);
+            adj[v[1]].push_back(v[0]);
         }
         jk = k;
         for(int i = 0; i < n; i++)
