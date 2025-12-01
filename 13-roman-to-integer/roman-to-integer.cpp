@@ -22,10 +22,11 @@ public:
         sum += f(s[0]);
         int prev = f(s[0]);
         for(int i = 1; i < s.size(); i++) {
-            sum += f(s[i]);
-            if(prev < f(s[i]))
-                sum -= 2 * prev;
-            prev = f(s[i]);
+            int val = f(s[i]);
+            sum += val;
+            if(prev < val)
+                sum -= prev << 1;
+            prev = val;
         }
         return sum;
     }
