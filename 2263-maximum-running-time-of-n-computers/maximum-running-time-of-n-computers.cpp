@@ -1,24 +1,22 @@
 class Solution {
 public:
     long long maxRunTime(int n, vector<int>& b) {
-        sort(b.begin(), b.end());
-        vector<int> l = vector<int>(b.begin() + b.size() - n, b.end());
-        long long extra = 0, rez = *l.begin();
-        int indx = 0;
-        for(int i = 0; i < b.size() - n; i++)
-            extra += b[i];
+        long long sp = 0;
+        for(int p : b) sp += p;
+        long long lo = 0, hi = sp / n, t;
 
-        for(int i = 1; i < n; i++) {
-            int val = (l[i] - l[i - 1]);
-            if(extra >= i * val) {
-                extra -= i * val;
-                rez += val;
-                indx = i;
-            }
+        while(lo < hi) {
+            t = (lo + hi + 1) / 2;
+            long long extra = 0;
+            
+            for(long long i : b)
+                extra += min(i, t);
+            
+            if(extra >= t * n)
+                lo = t;
             else 
-                break;
+                hi = t - 1;
         }
-        rez += extra / (indx + 1);
-        return rez;
+        return lo;
     }
 };
