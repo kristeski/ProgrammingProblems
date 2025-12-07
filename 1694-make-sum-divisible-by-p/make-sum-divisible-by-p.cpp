@@ -1,27 +1,22 @@
 class Solution {
 public:
+    const int M = 1e9 + 7;
     int minSubarray(vector<int>& nums, int p) {
-        int n = nums.size(), mini = 1e5 + 1;
-        vector<long long> pfs(n + 1), pfsmod(n + 1); pfs[0] = 0;
-        unordered_map<int, vector<int>> mp;
-        for (int i = 1; i <= n; i++) {
-            int nindx = i - 1;
-            pfs[i] = pfs[nindx] + nums[nindx];
-            pfsmod[i] = pfs[i] % p;
-            mp[pfsmod[i]].push_back(i);
+        unordered_map<int, int> mp;
+        long long t = 0;
+        for(int i : nums)
+            t += i;
+        int tar = (t % p);
+        int curr = 0; int best = nums.size();
+        if(tar == 0) return 0;
+        mp[0] = -1;
+        for(int i = 0; i < nums.size(); i++) {
+            curr = (curr + nums[i]) % p;
+            mp[curr] = i;
+            auto it = mp.find((p + curr - tar)%p);
+            if(it != mp.end()) 
+                best = min(best, i - (*it).second);
         }
-        if(!pfsmod[n]) return 0;
-        for (int i = 1; i <= n; i++) {
-            int nindx = i - 1;
-            int f = (pfsmod[n] + pfsmod[nindx]) % p;
-            auto it = lower_bound(mp[f].begin(), mp[f].end(), i);
-            if(it != mp[f].end())
-                mini = min(mini, mp[f][(int)(it - mp[f].begin())] - nindx);
-        }
-        if(mini == n)
-            return -1;
-        return mini;
+        return (best != nums.size()) ? best : -1;
     }
-
-
 };
